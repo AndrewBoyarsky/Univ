@@ -1,4 +1,15 @@
 package com.boyarsky.paralel;
 
-public class Bullet {
+import javax.swing.*;
+
+public class Bullet extends MovableGameObject{
+    @Override
+    protected void checkCoordinates() {
+
+    }
+
+    @Override
+    public void draw(JPanel jPanel) {
+
+    }
 }

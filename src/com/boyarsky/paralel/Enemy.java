@@ -1,4 +1,16 @@
 package com.boyarsky.paralel;
 
-public class Enemy {
+import javax.swing.*;
+
+public class Enemy extends MovableGameObject {
+
+    @Override
+    protected void checkCoordinates() {
+
+    }
+
+    @Override
+    public void draw(JPanel jPanel) {
+
+    }
 }
