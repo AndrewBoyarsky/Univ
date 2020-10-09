@@ -16,10 +16,22 @@ public class Game extends Thread {
     public Game(JPanel field) {
         this.field = field;
     }
+    boolean gameStarted = false;
 
     @SneakyThrows
     @Override
     public void run() {
+        int totalWaitTime = 15000;
+        synchronized (this) {
+            int currentWaitTime = 0;
+            while (!gameStarted && currentWaitTime < totalWaitTime) {
+                long startWaitTime = System.currentTimeMillis();
+                wait(100);
+                currentWaitTime += (System.currentTimeMillis() - startWaitTime);
+            }
+        }
+        log.info("GameStarted");
+
         createInitialObjects();
         createEnemySpawningThread();
         while (true) {
@@ -39,13 +51,15 @@ public class Game extends Thread {
             int timeStep = 10;
             int sleepDuration = 1000;
             int minSleepDuration = 250;
+            int enemyRadius = 100;
+            List<Enemy> enemies = Collections.synchronizedList(new ArrayList<>());
             @SneakyThrows
             @Override
             public void run() {
 
                 while (true) {
-
-                    new Enemy()
+                    Dimension size = field.getSize();
+//                    new Enemy()
                     log.info("Spawn enemy");
                     Thread.sleep(Math.max(sleepDuration -= timeStep, minSleepDuration));
                 }
