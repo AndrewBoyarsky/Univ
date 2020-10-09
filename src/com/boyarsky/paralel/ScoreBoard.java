@@ -42,9 +42,11 @@ public class ScoreBoard implements Runnable {
         }
         if (isWin()) {
             jFrame.setTitle("Victory!!!");
+            JOptionPane.showMessageDialog(jFrame, "Victory!");
         } else {
             jFrame.setTitle("Game over!");
-            jFrame.setBackground(Color.RED);
+            JOptionPane.showMessageDialog(jFrame, "Game Over!");
+//            jFrame.setBackground(Color.RED);
         }
     }
 
