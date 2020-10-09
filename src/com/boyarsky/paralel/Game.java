@@ -1,67 +1,132 @@
 package com.boyarsky.paralel;
 
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.image.BufferStrategy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
+
 @Slf4j
 public class Game extends Thread {
-    private final JPanel field;
+    private final JFrame field;
     private final List<GameObject> gameObjects = Collections.synchronizedList(new ArrayList<>());
+    private Player player;
+    public static final int TOTAL_WAIT_TIME = 15000;
 
-    public Game(JPanel field) {
+    public Game(JFrame field) {
         this.field = field;
     }
     boolean gameStarted = false;
 
-    @SneakyThrows
     @Override
     public void run() {
-        int totalWaitTime = 15000;
-        synchronized (this) {
-            int currentWaitTime = 0;
-            while (!gameStarted && currentWaitTime < totalWaitTime) {
-                long startWaitTime = System.currentTimeMillis();
-                wait(100);
-                currentWaitTime += (System.currentTimeMillis() - startWaitTime);
-            }
-        }
+        if (!gameStarted()) return;
         log.info("GameStarted");
 
         createInitialObjects();
         createEnemySpawningThread();
-        while (true) {
+        field.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+                    player.moveLeft();
+                }
+                if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+                    player.moveRight();
+                }
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    Bullet bullet = player.fire();
+                    if (bullet != null) {
+                        gameObjects.add(bullet);
+                        Thread thread = new Thread(bullet);
+                        thread.setUncaughtExceptionHandler(new DefaultExceptionHandler());
+                        thread.start();
+                    }
+                }
+            }
+        });
+        while (!Thread.currentThread().isInterrupted()) {
 
-            Thread.sleep(10);
+            BufferStrategy bufferStrategy = field.getBufferStrategy();
+            Graphics drawGraphics = bufferStrategy.getDrawGraphics();
+            drawGraphics.setColor(Color.BLACK);
+            drawGraphics.fillRect(0, 0, field.getWidth(), field.getHeight());
+            try {
+                for (int i = 0; i < gameObjects.size(); i++) {
+                    GameObject gameObject = gameObjects.get(i);
+                    if (gameObject.isAlive()) {
+                        gameObject.draw(drawGraphics);
+                    } else {
+                        gameObjects.remove(i);
+                    }
+                }
+            }
+            finally {
+                drawGraphics.dispose();
+            }
+            bufferStrategy.show();
+            Toolkit.getDefaultToolkit().sync();
+
+            try {
+                Thread.sleep(33);
+            } catch (InterruptedException e) {
+                log.error("Main thread for rendering was interrupted");
+                Thread.currentThread().interrupt();
+            }
         }
+        log.info("End of Game");
+    }
+
+    private boolean gameStarted() {
+        synchronized (this) {
+            int currentWaitTime = 0;
+            while (!gameStarted && currentWaitTime < TOTAL_WAIT_TIME) {
+                long startWaitTime = System.currentTimeMillis();
+                try {
+                    wait(100);
+                } catch (InterruptedException ignored) {
+                    log.info("Game was interrupted");
+                    return false;
+                }
+                currentWaitTime += (System.currentTimeMillis() - startWaitTime);
+            }
+        }
+        return true;
     }
 
     public void createInitialObjects() {
         Dimension size = field.getSize();
-        Player player = new Player((int) size.getWidth() / 2, (int) size.getHeight() - 50);
+        player = new Player((int) size.getWidth() / 2, (int) size.getHeight() - 50);
         gameObjects.add(player);
     }
 
     public void createEnemySpawningThread() {
         new Thread("Enemy Spawning") {
-            int timeStep = 10;
             int sleepDuration = 1000;
-            int minSleepDuration = 250;
             int enemyRadius = 100;
+            int probability = 50;
+            int maxProbability = 100;
             List<Enemy> enemies = Collections.synchronizedList(new ArrayList<>());
-            @SneakyThrows
             @Override
             public void run() {
 
-                while (true) {
-                    Dimension size = field.getSize();
-//                    new Enemy()
-                    log.info("Spawn enemy");
-                    Thread.sleep(Math.max(sleepDuration -= timeStep, minSleepDuration));
+                while (!Thread.currentThread().isInterrupted()) {
+                    probability = Math.min(probability + 1, maxProbability);
+                    int hit = new Random().nextInt(maxProbability);
+                    if (hit < probability) {
+                        log.info("Spawn enemy");
+                    }
+                    try {
+                        Thread.sleep(sleepDuration);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
             }
         }.start();

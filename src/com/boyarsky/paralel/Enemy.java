@@ -1,6 +1,7 @@
 package com.boyarsky.paralel;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class Enemy extends MovableGameObject {
 
@@ -15,7 +16,12 @@ public class Enemy extends MovableGameObject {
     }
 
     @Override
-    public void draw(JPanel jPanel) {
+    public void draw(Graphics graphics) {
 
+    }
+
+    @Override
+    boolean isAlive() {
+        return true;
     }
 }
