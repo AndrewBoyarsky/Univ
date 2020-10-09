@@ -1,13 +1,18 @@
 package com.boyarsky.paralel;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
+@Getter
+@ToString
 public abstract class MovableGameObject extends GameObject implements Movable{
     int speedX;
     int speedY;
 
-    public MovableGameObject(int x, int y, int speedX, int speedY) {
-        super(x, y);
+    public MovableGameObject(int size, int x, int y, int speedX, int speedY) {
+        super(x, y, size);
         this.speedX = speedX;
         this.speedY = speedY;
     }

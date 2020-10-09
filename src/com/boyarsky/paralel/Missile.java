@@ -10,7 +10,7 @@ public class Missile extends MovableGameObject implements Runnable {
     volatile boolean isAlive = true;
 
     private Missile(int width, int height, int x, int y, int speedX, int speedY) {
-        super(x, y, speedX, speedY);
+        super(Math.max(width /2, height /2), x, y, speedX, speedY);
         this.width = width;
         this.height = height;
     }
@@ -40,6 +40,16 @@ public class Missile extends MovableGameObject implements Runnable {
     @Override
     boolean isAlive() {
         return isAlive;
+    }
+
+    @Override
+    void collide(GameObject gameObject) {
+        if (gameObject instanceof Enemy) {
+            Enemy enemy = (Enemy) gameObject;
+            if (enemy.destroy()) {
+                isAlive = false;
+            }
+        }
     }
 
     public static Missile tryCreateBullet(int x, int y, int x1, int y1, int speed) {

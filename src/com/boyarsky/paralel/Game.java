@@ -14,9 +14,10 @@ import java.util.Random;
 
 @Slf4j
 public class Game extends Thread {
-    private final JFrame field;
+    final JFrame field;
     private final List<GameObject> gameObjects = Collections.synchronizedList(new ArrayList<>());
     private Player player;
+    private ScoreBoard scoreBoard;
     public static final int TOTAL_WAIT_TIME = 15000;
 
     public Game(JFrame field) {
@@ -35,10 +36,10 @@ public class Game extends Thread {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-                    player.moveLeft();
+                    player.moveLeft(0);
                 }
                 if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-                    player.moveRight();
+                    player.moveRight(field.getSize().width);
                 }
                 if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                     Missile missle = player.fire();
@@ -51,13 +52,33 @@ public class Game extends Thread {
                 }
             }
         });
-        while (!Thread.currentThread().isInterrupted()) {
 
+        while (!Thread.currentThread().isInterrupted()) {
+            if (scoreBoard.isWin() || scoreBoard.isLose()) {
+                break;
+            }
             BufferStrategy bufferStrategy = field.getBufferStrategy();
             Graphics drawGraphics = bufferStrategy.getDrawGraphics();
             drawGraphics.setColor(Color.BLACK);
             drawGraphics.fillRect(0, 0, field.getWidth(), field.getHeight());
             try {
+                for (int i = 0; i < gameObjects.size(); i++) {
+                    GameObject gameObject = gameObjects.get(i);
+                    if (gameObject.isAlive()) {
+                        for (int j = i + 1; j < gameObjects.size(); j++) {
+
+                            GameObject anotherObj = gameObjects.get(j);
+                            if (anotherObj.isAlive()) {
+                                int sumR = gameObject.getSize() + anotherObj.getSize();
+                                double actualDistance = Math.sqrt(Math.pow(gameObject.getX() - anotherObj.getX(), 2) + Math.pow(gameObject.getY() - anotherObj.getY(), 2));
+                                if (sumR >= actualDistance) {
+                                    gameObject.collide(anotherObj);
+                                    anotherObj.collide(gameObject);
+                                }
+                            }
+                        }
+                    }
+                }
                 for (int i = 0; i < gameObjects.size(); i++) {
                     GameObject gameObject = gameObjects.get(i);
                     if (gameObject.isAlive()) {
@@ -102,25 +123,50 @@ public class Game extends Thread {
 
     public void createInitialObjects() {
         Dimension size = field.getSize();
-        player = new Player((int) size.getWidth() / 2, (int) size.getHeight() - 50);
+        player = new Player((int) (size.getWidth()/ 32), (int) size.getWidth() / 2, (int) size.getHeight());
         gameObjects.add(player);
+        scoreBoard = new ScoreBoard(30, field);
+        Thread scoreBoardThread = new Thread(scoreBoard);
+        scoreBoardThread.setUncaughtExceptionHandler(new DefaultExceptionHandler());
+        scoreBoardThread.start();
     }
 
     public void createEnemySpawningThread() {
+        Game game = this;
         new Thread("Enemy Spawning") {
             int sleepDuration = 1000;
-            int enemyRadius = 100;
             int probability = 50;
             int maxProbability = 100;
             List<Enemy> enemies = Collections.synchronizedList(new ArrayList<>());
             @Override
             public void run() {
+                Dimension size = field.getSize();
+                double widthDrift = 0.15 * size.getWidth();
+                double heightDrift = 0.2 * size.getHeight();
+
+                double enemyHeight = size.getHeight() - 2 * heightDrift;
+                double enemyWidth = size.getWidth() - 2 * widthDrift;
+                double scale = enemyWidth / (enemyHeight);
+                int cols = 5;
+                int rows = (int) (scale * cols);
+                double rowsHeight = enemyHeight / rows;
+                double colWidth = (enemyWidth) / cols;
+                double slotSize = Math.min(colWidth, rowsHeight);
+
 
                 while (!Thread.currentThread().isInterrupted()) {
                     probability = Math.min(probability + 1, maxProbability);
-                    int hit = new Random().nextInt(maxProbability);
+                    Random random = new Random();
+                    int hit = random.nextInt(maxProbability);
                     if (hit < probability) {
                         log.info("Spawn enemy");
+                        int i = random.nextInt(cols);
+                        int j = random.nextInt(rows);
+                        Enemy newEnemy = new Enemy(game, (int) slotSize, (int) (i * colWidth + widthDrift), (int) (j * rowsHeight + widthDrift), random.nextInt(10) - 5, random.nextInt(10) - 5, scoreBoard);
+                        gameObjects.add(newEnemy);
+                        Thread enemyThread = new Thread(newEnemy);
+                        enemyThread.setUncaughtExceptionHandler(new DefaultExceptionHandler());
+                        enemyThread.start();
                     }
                     try {
                         Thread.sleep(sleepDuration);
