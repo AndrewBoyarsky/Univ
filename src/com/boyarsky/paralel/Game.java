@@ -41,10 +41,10 @@ public class Game extends Thread {
                     player.moveRight();
                 }
                 if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                    Bullet bullet = player.fire();
-                    if (bullet != null) {
-                        gameObjects.add(bullet);
-                        Thread thread = new Thread(bullet);
+                    Missile missle = player.fire();
+                    if (missle != null) {
+                        gameObjects.add(missle);
+                        Thread thread = new Thread(missle);
                         thread.setUncaughtExceptionHandler(new DefaultExceptionHandler());
                         thread.start();
                     }

@@ -17,7 +17,7 @@ public class Player extends GameObject{
         x = Math.min(x + stepSize, 900);
     }
 
-    public Bullet fire() {
+    public Missile fire() {
         int x1, x2;
         if (turnLeft) {
             x1 = x - 100;
@@ -26,11 +26,11 @@ public class Player extends GameObject{
             x1 = x + 80;
             x2 = x + 100;
         }
-        Bullet bullet = Bullet.tryCreateBullet(x1, y - 90, x2, y - 160, 5);
-        if (bullet != null) {
+        Missile missle = Missile.tryCreateBullet(x1, y - 90, x2, y - 160, 5);
+        if (missle != null) {
             turnLeft = !turnLeft;
         }
-        return bullet;
+        return missle;
 
     }
 

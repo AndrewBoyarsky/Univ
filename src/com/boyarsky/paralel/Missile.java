@@ -1,14 +1,15 @@
 package com.boyarsky.paralel;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.concurrent.Semaphore;
 
-public class Bullet extends MovableGameObject implements Runnable {
+public class Missile extends MovableGameObject implements Runnable {
     static final Semaphore semaphore = new Semaphore(3);
     int width;
     int height;
-    private Bullet(int width, int height, int x, int y, int speedX, int speedY) {
+    volatile boolean isAlive = true;
+
+    private Missile(int width, int height, int x, int y, int speedX, int speedY) {
         super(x, y, speedX, speedY);
         this.width = width;
         this.height = height;
@@ -16,7 +17,9 @@ public class Bullet extends MovableGameObject implements Runnable {
 
     @Override
     protected void checkCoordinates() {
-
+        if (y < 0) {
+            isAlive = false;
+        }
     }
 
     @Override
@@ -36,32 +39,33 @@ public class Bullet extends MovableGameObject implements Runnable {
 
     @Override
     boolean isAlive() {
-        return true;
+        return isAlive;
     }
 
-    public static Bullet tryCreateBullet(int x, int y, int x1, int y1, int speed) {
-        if (semaphore.tryAcquire()) {
-            try {
-                int width = Math.abs(x - x1);
-                int height = Math.abs(y - y1);
-
-                return new Bullet(width, height, x + (width /2), y - (height / 2), 0, -speed);
-            } finally {
-                semaphore.release();
-            }
-        }
-        return null;
+    public static Missile tryCreateBullet(int x, int y, int x1, int y1, int speed) {
+        int width = Math.abs(x - x1);
+        int height = Math.abs(y - y1);
+        return new Missile(width, height, x + (width / 2), y - (height / 2), 0, -speed);
     }
 
     @Override
     public void run() {
-        while (!Thread.currentThread().isInterrupted()) {
-            move();
+        if (semaphore.tryAcquire()) {
             try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                while (isAlive()) {
+                    move();
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } finally {
+                semaphore.release();
             }
+        } else {
+            isAlive = false;
         }
     }
 }
+
