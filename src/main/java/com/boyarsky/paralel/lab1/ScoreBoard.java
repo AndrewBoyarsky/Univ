@@ -3,7 +3,6 @@ package com.boyarsky.paralel.lab1;
 import lombok.Data;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Data

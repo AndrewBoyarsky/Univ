@@ -1,5 +1,4 @@
 package com.boyarsky.paralel.lab1;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
