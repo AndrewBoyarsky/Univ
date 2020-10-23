@@ -1,4 +1,4 @@
-package com.boyarsky.paralel;
+package com.boyarsky.paralel.lab1;
 
 import lombok.extern.slf4j.Slf4j;
 

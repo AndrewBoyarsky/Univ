@@ -1,11 +1,11 @@
-package com.boyarsky.paralel;
+package com.boyarsky.paralel.lab1;
 
 import lombok.extern.slf4j.Slf4j;
 
 import java.awt.*;
 @Slf4j
 public class Player extends GameObject{
-    final int stepSize;
+     final int stepSize;
     boolean turnLeft;
     volatile boolean isAlive = true;
     public static final int PLATFORM_SIZE = 100;
@@ -72,17 +72,5 @@ public class Player extends GameObject{
                 isAlive = false;
             }
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Player{" +
-                "stepSize=" + stepSize +
-                ", turnLeft=" + turnLeft +
-                ", isAlive=" + isAlive +
-                ", x=" + x +
-                ", y=" + y +
-                ", size=" + size +
-                '}';
     }
 }

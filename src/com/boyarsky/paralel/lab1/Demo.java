@@ -1,9 +1,8 @@
-package com.boyarsky.paralel;
+package com.boyarsky.paralel.lab1;
 
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -18,19 +17,12 @@ public class Demo {
 
     public Demo() {
         mainWindow = new JFrame("Parallel game");
-//        playField = new JPanel();
     }
 
     private void init() {
         mainWindow.setSize(1000, 800);
         mainWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-//        playField = new JPanel();
-//        playField.setSize(1000, 800);
-//        playField.setBackground(Color.BLACK);
-//        mainWindow.getContentPane().setLayout(new BoxLayout(mainWindow.getContentPane(), BoxLayout.Y_AXIS));
-//        mainWindow.add(playField);
-//        mainWindow.createBufferStrategy(2);
         mainWindow.setVisible(true);
         mainWindow.createBufferStrategy(2);
         Game game = new Game(mainWindow);

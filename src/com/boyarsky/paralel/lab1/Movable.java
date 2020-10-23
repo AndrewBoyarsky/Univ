@@ -1,4 +1,4 @@
-package com.boyarsky.paralel;
+package com.boyarsky.paralel.lab1;
 
 public interface Movable {
     void move();

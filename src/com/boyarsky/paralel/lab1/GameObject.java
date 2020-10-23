@@ -1,9 +1,8 @@
-package com.boyarsky.paralel;
+package com.boyarsky.paralel.lab1;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import javax.swing.*;
 import java.awt.*;
 
 @Data

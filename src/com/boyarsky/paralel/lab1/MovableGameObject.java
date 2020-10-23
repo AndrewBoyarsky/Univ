@@ -1,7 +1,5 @@
-package com.boyarsky.paralel;
+package com.boyarsky.paralel.lab1;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -16,14 +14,11 @@ public abstract class MovableGameObject extends GameObject implements Movable{
         this.speedX = speedX;
         this.speedY = speedY;
     }
-
-
     @Override
     public void move() {
         x += speedX;
         y += speedY;
         checkCoordinates();
     }
-
     protected abstract void checkCoordinates();
 }
