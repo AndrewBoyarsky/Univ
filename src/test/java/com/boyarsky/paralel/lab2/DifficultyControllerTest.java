@@ -11,9 +11,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class DifficultyControllerTest {
     @Test
     void testNonce() throws NoSuchAlgorithmException {
-        byte[] nonce = DifficultyController.parseHexString("00eb41c96c");
+        byte[] nonce = DiffService.parseHexString("00a00f245c");
         byte[] data = ("HelloWorld").getBytes();
-        byte[] target = DifficultyController.parseHexString("0000000f00000000000000000000000000000000000000000000000000000000");
+        byte[] target = DiffService.parseHexString("000000f000000000000000000000000000000000000000000000000000000000");
         MessageDigest instance = MessageDigest.getInstance("SHA-256");
         instance.update(data);
         byte[] result = instance.digest(nonce);
