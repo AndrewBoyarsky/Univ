@@ -76,7 +76,6 @@ public class DifficultyController {
         }
         for (SearchThread searchThread : searchThreads) {
             try {
-
                 searchThread.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -86,21 +85,21 @@ public class DifficultyController {
     }
 
     private static class ResultHolder {
+        private volatile boolean found = false;
         private volatile ArrayBlockingQueue<BigInteger> result = new ArrayBlockingQueue<>(1000);
 
         public boolean nullResult() {
-            return result.size() == 0;
+            return !found;
         }
-
         public List<BigInteger> allResult() {
             return new ArrayList<>(result);
         }
 
         public void addNewResult(BigInteger bigInteger) {
             result.add(bigInteger);
+            found = true;
         }
     }
-
     private static class SearchThread extends Thread {
         private BigInteger start;
         private BigInteger finish;
@@ -126,7 +125,6 @@ public class DifficultyController {
                 e.printStackTrace();
             }
         }
-
         @Override
         public void run() {
             int counter = 0;
@@ -140,13 +138,12 @@ public class DifficultyController {
                 if (res.compareTo(target) < 0) {
                     resultHolder.addNewResult(start);
                 }
-                if (counter % 50000 == 0) {
+                if (counter % 500000 == 0) {
                     log.info("Thread {} pass {}", getName(), counter);
                 }
             }
         }
     }
-
     @Data
     private static class DiffResponse {
         private List<String> nonce;
@@ -155,8 +152,6 @@ public class DifficultyController {
             this.nonce = nonce;
         }
     }
-
-
     @Data
     @AllArgsConstructor
     private static class DiffRequest {
@@ -164,5 +159,4 @@ public class DifficultyController {
         private String data;
 
     }
-
 }
